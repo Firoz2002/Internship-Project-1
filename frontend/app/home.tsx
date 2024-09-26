@@ -256,6 +256,7 @@ export default function QuestionScreen() {
         <Entypo name="menu" size={30} color="black" />
       </TouchableOpacity>
 
+      {/* Call Modal */}
       <Modal
         transparent={true}
         visible={incoming}
