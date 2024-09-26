@@ -24,7 +24,6 @@
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
     "agora-rtc-react": "^2.3.0",
-    "agora-rtc-sdk": "^3.6.11",
     "agora-rtc-sdk-ng": "^4.22.1",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
