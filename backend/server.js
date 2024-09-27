@@ -6,7 +6,6 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 const connect = require("./config/database");
-//const client = AgoraRTC.createClient({mode: "rtc", codec: "vp8"});
 
 require('dotenv').config();
 const port = process.env.PORT || 4000;

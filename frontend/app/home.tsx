@@ -5,23 +5,25 @@ import { AntDesign, Entypo } from '@expo/vector-icons';
 import { Dimensions } from 'react-native';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import socketIO from 'socket.io-client';
-
+import uuid from 'react-native-uuid';
+ 
 import { storage } from './login';
+import CallPopup from "@/components/CallPopup";
 
 const windowWidth = Dimensions.get('window').width;
 
 export default function QuestionScreen() {
-  const [isEnabled, setIsEnabled] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(true);
   const [animation] = useState(new Animated.Value(0));
   const [selectedSkill, setSelectedSkill] = useState('');
   const [question, setQuestion] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [showQuestionError, setShowQuestionError] = useState(false);
-  const [showSkillError, setShowSkillError] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
-  const [incoming, setIncoming] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [showSkillError, setShowSkillError] = useState(false);
+  const [callPopupVisible, setCallPopupVisible] = useState(false);
+  const [showQuestionError, setShowQuestionError] = useState(false);
   const router = useRouter();
-
+  const [doubtSessionId, setDoubtSessionId] = useState("");
   const socket = socketIO(process.env.API_KEY);
   const userID = storage.getString('user.userId');
   const userType = storage.getString('user.userType');
@@ -66,7 +68,6 @@ export default function QuestionScreen() {
 
   const toggleSwitch = async () => {
     const newStatus = !isEnabled;
-    setIncoming(true);
     setIsEnabled(newStatus);
     Animated.timing(animation, {
       toValue: newStatus ? 1 : 0,
@@ -184,12 +185,14 @@ export default function QuestionScreen() {
         const data = await response.json();
         // Login successfull
 
+        let roomID = uuid.v4();
+
         socket.emit('doubt', {
           userID: userID,
+          roomID: roomID,
           question: question
         })
-        
-        //router.push({ pathname: `/doubtSession`, params: { channelName: encodeURIComponent(`${"test"}`) }});
+        router.push({ pathname: `/doubtSession`, params: { channelName: encodeURIComponent(`${roomID}`) }});
       } else {
         // This shouldn't happen if the backend is set up correctly, but just in case
         console.log('An unexpected error occurred. Please try again.');
@@ -242,12 +245,23 @@ export default function QuestionScreen() {
   };
 
   socket.on('doubt', (data) => {
-    //router.push({ pathname: `/doubtSession`, params: { channelName: encodeURIComponent(`${"test"}`) }});
     if(data.userID !== userID && isEnabled) {
-      
+      setDoubtSessionId(data.roomID);
+      handleShowPopup();
     }
   })
 
+  const handleShowPopup = () => {
+    setCallPopupVisible(true);
+  }
+
+  const handleAcceptCall = () => {
+    router.push({ pathname: `/doubtSession`, params: { channelName: encodeURIComponent(`${doubtSessionId}`) }});
+  }
+
+  const handleDeclineCall = () => {
+    setCallPopupVisible(false);
+  }
 
   return (
     <View style={styles.container}>
@@ -257,22 +271,13 @@ export default function QuestionScreen() {
       </TouchableOpacity>
 
       {/* Call Modal */}
-      <Modal
-        transparent={true}
-        visible={incoming}
-        onRequestClose={() => setIncoming(false)}
-        animationType="none"
-      >
-        <TouchableOpacity style={styles.menuModalOverlay} onPress={() => setMenuVisible(false)}>
-          <View style={styles.menuModal}>
-            <TouchableOpacity>
-              <Text style={styles.menuText}>Jhon doe needs your help</Text>
-              <Button title='Accept' color={"#48d948"}/>
-              <Button title='Decline' onPress={() => setIncoming(false)} color={"#FF0000"}/>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      <View>
+        <CallPopup 
+          visible={callPopupVisible}
+          onAccept={handleAcceptCall}
+          onDecline={handleDeclineCall}
+        />
+      </View>
 
       {/* Hamburger Menu Modal */}
       <Modal
@@ -539,5 +544,12 @@ const styles = StyleSheet.create({
   },
   errorInput: {
     borderColor: 'red',
+  },
+  callContainer: {
+    flex: 1,
+    position: "relative",
+    zIndex: -1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

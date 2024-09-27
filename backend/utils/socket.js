@@ -19,18 +19,8 @@ function socket(io) {
         });
 
         socket.on('doubt', (data) => {
-            console.log(data);
             socket.broadcast.to("mentor").emit('doubt', data);
         });
-
-        socket.on('join-room', (senderID, receiverID) => {
-            socket.join(roomId);
-            //socket.broadcast.emit('user-connected', userId);
-
-            socket.on('disconnect', () => {
-                socket.broadcast.emit('user-disconnected', userId);
-            })
-        })
     })
 }
 
