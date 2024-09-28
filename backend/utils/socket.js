@@ -21,6 +21,10 @@ function socket(io) {
         socket.on('doubt', (data) => {
             socket.broadcast.to("mentor").emit('doubt', data);
         });
+
+        socket.on('calloff', () => {
+            socket.broadcast.to("mentor").emit('calloff');
+        })
     })
 }
 

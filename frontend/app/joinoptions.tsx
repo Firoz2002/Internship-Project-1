@@ -39,11 +39,11 @@ export default function JoinAsLearnerAndGuru() {
 
     let joinOption;
     if (selectedRoles.includes('Guru') && selectedRoles.includes('Learner')) {
-      joinOption = 'Both';
+      joinOption = 'both';
     } else if (selectedRoles.includes('Guru')) {
-      joinOption = 'Guru';
+      joinOption = 'mentor';
     } else {
-      joinOption = 'Learner';
+      joinOption = 'student';
     }
 
     console.log('Determined joinOption:', joinOption);
@@ -56,9 +56,9 @@ export default function JoinAsLearnerAndGuru() {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(
-          { userId, joinOption }
-        )
+        body: JSON.stringify({
+          userType: joinOption
+        })
       });
       
       if (response.ok) {

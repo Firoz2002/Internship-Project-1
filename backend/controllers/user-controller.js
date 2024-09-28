@@ -7,6 +7,8 @@ const jwtSecret = process.env.SECRET;
 
 const createUser = (req, res, next) => {
     const {username, email, password, userType, phoneNo} = req.body;
+    const skillsToTeach = [];
+    const skillsToLearn = [];
 
     try {
         User.findOne({
@@ -26,6 +28,8 @@ const createUser = (req, res, next) => {
                     password,
                     userType,
                     phoneNo,
+                    skillsToLearn,
+                    skillsToTeach,
                 })
                 .then((data) => {
                     res.send(data);
@@ -131,18 +135,18 @@ const updateUser = (req, res, next) => {
         User.findById(userID)
         .then((data) => {
             
-            let skillSet = [];
+            let skillSet;
             const skillType = req.body.skillType;
 
             if(skillType === "teach") {
-                skillSet = data.skillsToTeach || [];
+                skillSet = data.skillsToTeach;
                 const skills = req.body.skills;
 
                 skills.forEach(skill => {
                     skillSet.push(skill);
                 });
             } else if(skillType === "learn") {
-                skillSet = data.skillsToLearn || [];
+                skillSet = data.skillsToLearn;
                 const skills = req.body.skills;
 
                 skills.forEach(skill => {
@@ -159,8 +163,8 @@ const updateUser = (req, res, next) => {
                     userType : req.body.userType || data.userType,
                     countryCode: req.body.countryCode || data.countryCode,
                     isAvaliable : req.body.isAvaliable || data.isAvaliable,
-                    skillsToLearn : req.body.skillsToLearn || data.skillSet,
-                    skillsToTeach : (req.skillType === "teach") ? skillSet : data.skillSet,
+                    skillsToLearn : (req.body.skillType === 'learn') ? skillSet : data.skillSet,
+                    skillsToTeach : (req.body.skillType === 'teach') ? skillSet : data.skillSet,
                 }}
             )
             .then(() => {

@@ -5,7 +5,6 @@ import { AntDesign, Entypo } from '@expo/vector-icons';
 import { Dimensions } from 'react-native';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import socketIO from 'socket.io-client';
-import uuid from 'react-native-uuid';
  
 import { storage } from './login';
 import CallPopup from "@/components/CallPopup";
@@ -185,14 +184,12 @@ export default function QuestionScreen() {
         const data = await response.json();
         // Login successfull
 
-        let roomID = uuid.v4();
-
         socket.emit('doubt', {
           userID: userID,
-          roomID: roomID,
+          roomID: data.roomID,
           question: question
         })
-        router.push({ pathname: `/doubtSession`, params: { channelName: encodeURIComponent(`${roomID}`) }});
+        router.push({ pathname: `/doubtSession`, params: { channelName: encodeURIComponent(`${data.roomID}`) }});
       } else {
         // This shouldn't happen if the backend is set up correctly, but just in case
         console.log('An unexpected error occurred. Please try again.');
@@ -251,11 +248,16 @@ export default function QuestionScreen() {
     }
   })
 
+  socket.on('calloff', () => {
+    handleDeclineCall;
+  })
+
   const handleShowPopup = () => {
     setCallPopupVisible(true);
   }
 
   const handleAcceptCall = () => {
+    socket.emit('calloff');
     router.push({ pathname: `/doubtSession`, params: { channelName: encodeURIComponent(`${doubtSessionId}`) }});
   }
 
