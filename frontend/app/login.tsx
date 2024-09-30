@@ -68,6 +68,8 @@ export default function LoginScreen() {
         // Login successful
         storage.set('user.userId', data.userId);
         storage.set('user.userType', data.userType);
+        storage.set('user.username', data.userName);
+        storage.set('user.skillSet', JSON.stringify(data.skillSet));
         
         router.push(`/home`);
       } else {
@@ -75,6 +77,7 @@ export default function LoginScreen() {
         setLoginError('An unexpected error occurred. Please try again.');
       }
     } catch (error) {
+      console.log(error);
       if (error.response && error.response.status === 401) {
         setLoginError('Invalid email or password.');
       } else {

@@ -11,4 +11,19 @@ function getUsers(arr){
     }
 }
 
-module.exports = {getUsers, users};
+function getRoom(room, user, socket) {
+    room = room.replace(" ", "");
+    
+    if(users[room]) {
+        users[room].push(user);
+    } else {
+        users[room] = [user];
+    }
+    socket.join(room);
+}
+
+module.exports = {
+    getUsers, 
+    getRoom,
+    users
+};

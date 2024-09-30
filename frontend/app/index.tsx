@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { AntDesign, FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { MMKV } from 'react-native-mmkv';
+
+export const storage = new MMKV();
 
 export default function SignupScreen() {
   const [fullName, setFullName] = useState('');
@@ -83,6 +86,10 @@ export default function SignupScreen() {
         console.log('Response from server:', data);
   
         if (response.ok) {
+          storage.set('user.userId', data.userId);
+          storage.set('user.userType', data.userType);
+          storage.set('user.username', data.username);
+          storage.set('user.skillSet', data.skillsToTeach);
           console.log('Signup successful. Attempting to navigate to joinoptions screen');
           router.push({
             pathname: '/joinoptions',

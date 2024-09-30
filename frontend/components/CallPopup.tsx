@@ -2,12 +2,16 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from "react-native";
 
 interface CallPopupProps {
+    doubt: string;
+    caller: string;
     visible: boolean;
     onAccept: () => void;
     onDecline: () => void;
 }
 
 const CallPopup: React.FC<CallPopupProps> = ({
+    doubt,
+    caller,
     visible,
     onAccept,
     onDecline,
@@ -38,8 +42,8 @@ const CallPopup: React.FC<CallPopupProps> = ({
                 { transform: [{ translateY: slideAnim }] },
             ]}
         >
-            <Text style={styles.title}>Incoming Call</Text>
-            <Text style={styles.callerName}>Chuck Norris</Text>
+            <Text style={styles.title}> Doubt: {doubt} </Text>
+            <Text style={styles.callerName}> Caller: {caller} </Text>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
                 style={[styles.button, styles.declineButton]}

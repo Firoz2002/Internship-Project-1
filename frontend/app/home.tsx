@@ -12,25 +12,36 @@ import CallPopup from "@/components/CallPopup";
 const windowWidth = Dimensions.get('window').width;
 
 export default function QuestionScreen() {
-  const [isEnabled, setIsEnabled] = useState(true);
+
   const [animation] = useState(new Animated.Value(0));
   const [selectedSkill, setSelectedSkill] = useState('');
   const [question, setQuestion] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [showSkillError, setShowSkillError] = useState(false);
-  const [callPopupVisible, setCallPopupVisible] = useState(false);
   const [showQuestionError, setShowQuestionError] = useState(false);
   const router = useRouter();
+
+  //Incoming Doubt Call
+  const [query, setQuery] = useState("");
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [callerName, setCallerName] = useState("");
   const [doubtSessionId, setDoubtSessionId] = useState("");
+  const [callPopupVisible, setCallPopupVisible] = useState(false);
+
   const socket = socketIO(process.env.API_KEY);
+
   const userID = storage.getString('user.userId');
   const userType = storage.getString('user.userType');
-  
+  const userName = storage.getString('user.username');
+  const skillSet = storage.getString('user.skillSet');
+
   useEffect(() => {
     socket.emit('user-online', {
       id: userID,
       type: userType,
+      skillSet: skillSet,
+      username: userName,
     });
     fetchUserData();
   }, []);
@@ -67,31 +78,12 @@ export default function QuestionScreen() {
 
   const toggleSwitch = async () => {
     const newStatus = !isEnabled;
-    setIsEnabled(newStatus);
+    setIsEnabled(!isEnabled);
     Animated.timing(animation, {
       toValue: newStatus ? 1 : 0,
       duration: 300,
       useNativeDriver: false,
     }).start();
-
-    try {
-      const response = await fetch(`${process.env.API_KEY}/v1/api/user`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          isAvaliable: isEnabled 
-        })
-      });
-      if (!response.ok) {
-        throw new Error('Failed to update toggle status');
-      }
-    } catch (error) {
-      console.error('Error updating toggle status:', error);
-      Alert.alert('Error', 'Failed to update toggle status. Please try again.');
-    }
   };
 
   const toggleInterpolation = animation.interpolate({
@@ -185,11 +177,12 @@ export default function QuestionScreen() {
         // Login successfull
 
         socket.emit('doubt', {
-          userID: userID,
-          roomID: data.roomID,
-          question: question
+          username: userName,
+          question: question,
+          room: data.info._id,
+          topic: data.info.topic,
         })
-        router.push({ pathname: `/doubtSession`, params: { channelName: encodeURIComponent(`${data.roomID}`) }});
+        router.push({ pathname: `/doubtSession`, params: { channelName: encodeURIComponent(`${data.info._id}`) }});
       } else {
         // This shouldn't happen if the backend is set up correctly, but just in case
         console.log('An unexpected error occurred. Please try again.');
@@ -242,14 +235,16 @@ export default function QuestionScreen() {
   };
 
   socket.on('doubt', (data) => {
-    if(data.userID !== userID && isEnabled) {
-      setDoubtSessionId(data.roomID);
+    if(isEnabled) {
+      setQuery(data.question);
+      setCallerName(data.username);
+      setDoubtSessionId(data.room);
       handleShowPopup();
     }
   })
 
   socket.on('calloff', () => {
-    handleDeclineCall;
+    handleDeclineCall();
   })
 
   const handleShowPopup = () => {
@@ -275,6 +270,8 @@ export default function QuestionScreen() {
       {/* Call Modal */}
       <View>
         <CallPopup 
+          doubt={query}
+          caller={callerName}
           visible={callPopupVisible}
           onAccept={handleAcceptCall}
           onDecline={handleDeclineCall}

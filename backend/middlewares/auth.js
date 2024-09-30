@@ -91,11 +91,12 @@ const login = (req, res, next) => {
                         sameSite: "none",
                         secure: "false",
                     });
-                    console.log(data);
                     res.status(201).json({
                         message: "Login Successful",
                         userId: data._id,
-                        userType: data.userType
+                        userName: data.username,
+                        userType: data.userType,
+                        skillSet: data.skillsToTeach,
                     });
                 } else {
                     res.status(403).json({

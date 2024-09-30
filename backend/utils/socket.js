@@ -1,25 +1,28 @@
-const {getUsers, users} = require("./getUsers");
+const {getUsers, getRoom} = require("./getUsers");
 
 function socket(io) {
     io.on('connection', (socket) => {
-        
-        socket.on('user-online', (data) => {
 
+        socket.on('user-online', (data) => {
             var user = {};
             user[socket.id] = data.id;
 
-            if(users[data.type] === "mentor" || user[data.type] === "both") {
-                users["mentor"].push(user);
+            if(data.type === "mentor" || data.type === "both") {
+                getRoom("mentor", user, socket);
+
+                const skillSet = JSON.parse(data.skillSet);
+                skillSet.forEach(skill => {
+                    getRoom(skill, user, socket);
+                });
             }
             else {
-                users["student"] = [user];
+                getRoom("student", user, socket);
             }
-
-            socket.join(data.type);
         });
 
         socket.on('doubt', (data) => {
-            socket.broadcast.to("mentor").emit('doubt', data);
+            const topic = data.topic.replace(" ", "");
+            socket.broadcast.to(topic).emit('doubt', data);
         });
 
         socket.on('calloff', () => {

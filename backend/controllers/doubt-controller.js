@@ -18,7 +18,7 @@ const createDoubt = (req, res, next) => {
         .then((data) => {
             res.status(201).json({
                 message: "Doubt successfully created",
-                data: data
+                info: data
             });
         })        
     } catch (err) {
