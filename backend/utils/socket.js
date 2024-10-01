@@ -25,8 +25,8 @@ function socket(io) {
             socket.broadcast.to(topic).emit('doubt', data);
         });
 
-        socket.on('calloff', () => {
-            socket.broadcast.to("mentor").emit('calloff');
+        socket.on('calloff', (data) => {
+            socket.broadcast.to("mentor").emit('calloff', data);
         })
     })
 }

@@ -4,9 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
-import { MMKV } from 'react-native-mmkv';
-
-export const storage = new MMKV();
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -66,10 +64,10 @@ export default function LoginScreen() {
 
       if (response.status === 201 && data.userId) {
         // Login successful
-        storage.set('user.userId', data.userId);
-        storage.set('user.userType', data.userType);
-        storage.set('user.username', data.userName);
-        storage.set('user.skillSet', JSON.stringify(data.skillSet));
+        await AsyncStorage.setItem('userId', data.userId);
+        await AsyncStorage.setItem('userType', data.userType);
+        await AsyncStorage.setItem('username', data.userName);
+        await AsyncStorage.setItem('skillSet', JSON.stringify(data.skillSet));
         
         router.push(`/home`);
       } else {

@@ -5,18 +5,18 @@ import { AntDesign, Entypo } from '@expo/vector-icons';
 import { Dimensions } from 'react-native';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import socketIO from 'socket.io-client';
- 
-import { storage } from './login';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import CallPopup from "@/components/CallPopup";
 
 const windowWidth = Dimensions.get('window').width;
 
 export default function QuestionScreen() {
 
-  const [animation] = useState(new Animated.Value(0));
-  const [selectedSkill, setSelectedSkill] = useState('');
   const [question, setQuestion] = useState('');
+  const [animation] = useState(new Animated.Value(0));
   const [menuVisible, setMenuVisible] = useState(false);
+  const [selectedSkill, setSelectedSkill] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [showSkillError, setShowSkillError] = useState(false);
   const [showQuestionError, setShowQuestionError] = useState(false);
@@ -24,19 +24,32 @@ export default function QuestionScreen() {
 
   //Incoming Doubt Call
   const [query, setQuery] = useState("");
-  const [isEnabled, setIsEnabled] = useState(true);
+  const [callId, setCallId] = useState("");
   const [callerName, setCallerName] = useState("");
-  const [doubtSessionId, setDoubtSessionId] = useState("");
+  const [isEnabled, setIsEnabled] = useState(true);
   const [callPopupVisible, setCallPopupVisible] = useState(false);
 
   const socket = socketIO(process.env.API_KEY);
 
-  const userID = storage.getString('user.userId');
-  const userType = storage.getString('user.userType');
-  const userName = storage.getString('user.username');
-  const skillSet = storage.getString('user.skillSet');
+  const [userID, setUserID] = useState<string | null>();
+  const [userType, setUserType] = useState<string | null>();
+  const [skillSet, setSkillSet] = useState<string | null>();
+  const [userName, setUserName] = useState<string | null>();
+
+  const getData = async() => {
+    try {
+      setUserID(await AsyncStorage.getItem('userId'));
+      setUserType(await AsyncStorage.getItem('userType'));
+      setUserName(await AsyncStorage.getItem('username'));
+      setSkillSet(await AsyncStorage.getItem('skillSet'));
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   useEffect(() => {
+    getData();
     socket.emit('user-online', {
       id: userID,
       type: userType,
@@ -238,13 +251,15 @@ export default function QuestionScreen() {
     if(isEnabled) {
       setQuery(data.question);
       setCallerName(data.username);
-      setDoubtSessionId(data.room);
+      setCallId(data.room);
       handleShowPopup();
     }
   })
 
-  socket.on('calloff', () => {
-    handleDeclineCall();
+  socket.on('calloff', (data) => {
+    if(data.callID==callId) {
+      handleDeclineCall();
+    }
   })
 
   const handleShowPopup = () => {
@@ -252,8 +267,10 @@ export default function QuestionScreen() {
   }
 
   const handleAcceptCall = () => {
-    socket.emit('calloff');
-    router.push({ pathname: `/doubtSession`, params: { channelName: encodeURIComponent(`${doubtSessionId}`) }});
+    socket.emit('calloff', {
+      callID: callId
+    });
+    router.push({ pathname: `/doubtSession`, params: { channelName: encodeURIComponent(`${callId}`) }});
   }
 
   const handleDeclineCall = () => {

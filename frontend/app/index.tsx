@@ -4,6 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } fro
 import { AntDesign, FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { MMKV } from 'react-native-mmkv';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const storage = new MMKV();
 
@@ -86,10 +87,10 @@ export default function SignupScreen() {
         console.log('Response from server:', data);
   
         if (response.ok) {
-          storage.set('user.userId', data.userId);
-          storage.set('user.userType', data.userType);
-          storage.set('user.username', data.username);
-          storage.set('user.skillSet', data.skillsToTeach);
+          const userID = AsyncStorage.getItem('user.userId');
+          const userType = AsyncStorage.getItem('user.userType');
+          const userName = AsyncStorage.getItem('user.username');
+          const skillSet = AsyncStorage.getItem('user.skillSet');
           console.log('Signup successful. Attempting to navigate to joinoptions screen');
           router.push({
             pathname: '/joinoptions',
