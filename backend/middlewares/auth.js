@@ -39,7 +39,9 @@ const register =  async (req, res, next) => {
                 res.status(200).json({
                     message: "User successfully created",
                     userId: data._id,
-                    userType: data.userType
+                    userName: data.username,
+                    userType: data.userType,
+                    skillSet: data.skillsToTeach,
                 })
 
             } else {
