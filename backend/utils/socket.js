@@ -21,6 +21,7 @@ function socket(io) {
         });
 
         socket.on('doubt', (data) => {
+            console.log("User asked about a doubt: ", data);
             const topic = data.topic.replace(" ", "");
             socket.broadcast.to(topic).emit('doubt', data);
         });
