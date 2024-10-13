@@ -19,7 +19,7 @@ function getRoom(room, user, socket) {
     } else {
         users[room] = [user];
     }
-    console.log(`${user} joined room: `, room);
+    console.log(`${Object.values(onlineUser)[0]} joined room: `, room);
     socket.join(room);
 }
 
