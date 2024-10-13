@@ -6,7 +6,7 @@ function socket(io) {
         socket.on('user-online', (data) => {
             var user = {};
             user[socket.id] = data.id;
-
+console.log(data);
             if(data.type === "mentor" || data.type === "both") {
                 getRoom("mentor", user, socket);
 
