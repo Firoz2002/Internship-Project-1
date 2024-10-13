@@ -15,11 +15,11 @@ function getRoom(room, user, socket) {
     room = room.replace(" ", "");
     
     if(users[room]) {
-        users[room].push(user);
+        users[room].push(Object.values(user)[0]);
     } else {
-        users[room] = [user];
-    }
-    console.log(`${Object.values(user)[0]} joined room: `, room);
+        users[room] = [Object.values(user)[0]];
+    }                    
+  
     socket.join(room);
 }
 
